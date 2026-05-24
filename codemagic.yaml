@@ -1,23 +1,25 @@
 workflows:
-  # ── iOS Build (免费 Apple ID) ─────────────────
+  # ── iOS Build (AltStore 签名) ─────────────────
   ios-build:
-    name: iOS Build (7天有效)
+    name: iOS Build
     max_build_duration: 60
     instance_type: mac_mini_m2
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
-    code_signing:
-      automatic:
-        provisioning_profile_type: development
     scripts:
       - name: Flutter pub get
         script: flutter pub get
-      - name: Flutter build ipa
-        script: flutter build ipa --debug --export-method development
+      - name: Build iOS without signing
+        script: |
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          cp -R Runner.app Payload/
+          zip -r unsigned.ipa Payload
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/iphoneos/unsigned.ipa
 
   # ── Android Build ─────────────────────────────
   android-build:
